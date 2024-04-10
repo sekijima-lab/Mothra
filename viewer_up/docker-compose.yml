@@ -1,0 +1,32 @@
+version: "3"
+services:
+  jupyter-docker:
+    container_name: jupyter-docker
+    build:
+      context: ./jupyter-docker/
+      dockerfile: Dockerfile
+#    restart: never
+    entrypoint: >
+      jupyter-lab
+      --allow-root
+      --ip=0.0.0.0
+      --port=8080
+      --no-browser
+      --NotebookApp.token=''
+      --notebook-dir=/workspace
+    expose:
+      - "8080"
+    ports:
+      - "127.0.0.1:8080:8080"
+    tty: true
+    volumes:
+      - ./jupyter-docker/root_jupyter-docker:/root/.jupyter
+      - ./workspace:/workspace
+    environment:
+      - "NVIDIA_VISIBLE_DEVICES=all"
+      - "NVIDIA_DRIVIER_CAPABILITIES=all"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
