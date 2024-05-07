@@ -1,0 +1,286 @@
+{
+    "class_name": "Functional",
+    "config": {
+        "name": "model",
+        "layers": [
+            {
+                "class_name": "InputLayer",
+                "config": {
+                    "batch_input_shape": [
+                        null,
+                        81
+                    ],
+                    "dtype": "float32",
+                    "sparse": false,
+                    "ragged": false,
+                    "name": "input_1"
+                },
+                "name": "input_1",
+                "inbound_nodes": []
+            },
+            {
+                "class_name": "Embedding",
+                "config": {
+                    "name": "embedding",
+                    "trainable": true,
+                    "batch_input_shape": [
+                        null,
+                        81
+                    ],
+                    "dtype": "float32",
+                    "input_dim": 64,
+                    "output_dim": 64,
+                    "embeddings_initializer": {
+                        "class_name": "RandomUniform",
+                        "config": {
+                            "minval": -0.05,
+                            "maxval": 0.05,
+                            "seed": null
+                        }
+                    },
+                    "embeddings_regularizer": null,
+                    "activity_regularizer": null,
+                    "embeddings_constraint": null,
+                    "mask_zero": false,
+                    "input_length": 81
+                },
+                "name": "embedding",
+                "inbound_nodes": [
+                    [
+                        [
+                            "input_1",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            },
+            {
+                "class_name": "GRU",
+                "config": {
+                    "name": "gru",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "return_sequences": true,
+                    "return_state": false,
+                    "go_backwards": false,
+                    "stateful": false,
+                    "unroll": false,
+                    "time_major": false,
+                    "units": 256,
+                    "activation": "tanh",
+                    "recurrent_activation": "sigmoid",
+                    "use_bias": true,
+                    "kernel_initializer": {
+                        "class_name": "GlorotUniform",
+                        "config": {
+                            "seed": null
+                        },
+                        "shared_object_id": 3
+                    },
+                    "recurrent_initializer": {
+                        "class_name": "Orthogonal",
+                        "config": {
+                            "gain": 1.0,
+                            "seed": null
+                        },
+                        "shared_object_id": 4
+                    },
+                    "bias_initializer": {
+                        "class_name": "Zeros",
+                        "config": {},
+                        "shared_object_id": 5
+                    },
+                    "kernel_regularizer": null,
+                    "recurrent_regularizer": null,
+                    "bias_regularizer": null,
+                    "activity_regularizer": null,
+                    "kernel_constraint": null,
+                    "recurrent_constraint": null,
+                    "bias_constraint": null,
+                    "dropout": 0.0,
+                    "recurrent_dropout": 0.0,
+                    "implementation": 2,
+                    "reset_after": true
+                },
+                "name": "gru",
+                "inbound_nodes": [
+                    [
+                        [
+                            "embedding",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            },
+            {
+                "class_name": "Dropout",
+                "config": {
+                    "name": "dropout",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "rate": 0.2,
+                    "noise_shape": null,
+                    "seed": null
+                },
+                "name": "dropout",
+                "inbound_nodes": [
+                    [
+                        [
+                            "gru",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            },
+            {
+                "class_name": "GRU",
+                "config": {
+                    "name": "gru_1",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "return_sequences": true,
+                    "return_state": false,
+                    "go_backwards": false,
+                    "stateful": false,
+                    "unroll": false,
+                    "time_major": false,
+                    "units": 256,
+                    "activation": "tanh",
+                    "recurrent_activation": "sigmoid",
+                    "use_bias": true,
+                    "kernel_initializer": {
+                        "class_name": "GlorotUniform",
+                        "config": {
+                            "seed": null
+                        },
+                        "shared_object_id": 9
+                    },
+                    "recurrent_initializer": {
+                        "class_name": "Orthogonal",
+                        "config": {
+                            "gain": 1.0,
+                            "seed": null
+                        },
+                        "shared_object_id": 10
+                    },
+                    "bias_initializer": {
+                        "class_name": "Zeros",
+                        "config": {},
+                        "shared_object_id": 11
+                    },
+                    "kernel_regularizer": null,
+                    "recurrent_regularizer": null,
+                    "bias_regularizer": null,
+                    "activity_regularizer": null,
+                    "kernel_constraint": null,
+                    "recurrent_constraint": null,
+                    "bias_constraint": null,
+                    "dropout": 0.0,
+                    "recurrent_dropout": 0.0,
+                    "implementation": 2,
+                    "reset_after": true
+                },
+                "name": "gru_1",
+                "inbound_nodes": [
+                    [
+                        [
+                            "dropout",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            },
+            {
+                "class_name": "Dropout",
+                "config": {
+                    "name": "dropout_1",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "rate": 0.2,
+                    "noise_shape": null,
+                    "seed": null
+                },
+                "name": "dropout_1",
+                "inbound_nodes": [
+                    [
+                        [
+                            "gru_1",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            },
+            {
+                "class_name": "TimeDistributed",
+                "config": {
+                    "name": "time_distributed",
+                    "trainable": true,
+                    "dtype": "float32",
+                    "layer": {
+                        "class_name": "Dense",
+                        "config": {
+                            "name": "dense",
+                            "trainable": true,
+                            "dtype": "float32",
+                            "units": 64,
+                            "activation": "softmax",
+                            "use_bias": true,
+                            "kernel_initializer": {
+                                "class_name": "GlorotUniform",
+                                "config": {
+                                    "seed": null
+                                }
+                            },
+                            "bias_initializer": {
+                                "class_name": "Zeros",
+                                "config": {}
+                            },
+                            "kernel_regularizer": null,
+                            "bias_regularizer": null,
+                            "activity_regularizer": null,
+                            "kernel_constraint": null,
+                            "bias_constraint": null
+                        }
+                    }
+                },
+                "name": "time_distributed",
+                "inbound_nodes": [
+                    [
+                        [
+                            "dropout_1",
+                            0,
+                            0,
+                            {}
+                        ]
+                    ]
+                ]
+            }
+        ],
+        "input_layers": [
+            [
+                "input_1",
+                0,
+                0
+            ]
+        ],
+        "output_layers": [
+            [
+                "time_distributed",
+                0,
+                0
+            ]
+        ]
+    },
+    "keras_version": "2.9.0",
+    "backend": "tensorflow"
+}
