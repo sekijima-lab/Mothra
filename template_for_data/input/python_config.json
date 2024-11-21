@@ -1,0 +1,14 @@
+{
+    "isLoadTree": false,
+    "whereisParetoFile":"./present/pareto.json",
+    "whereisRNNmodelDir": "./model3/",
+    "limitTimeHours":23,
+    "limitTimeMinutes": 30,
+    "limitTimeSeconds": 0,
+    "isUseeToxPred": true,
+    "proteinName": "3zosA_prepared",
+    "randomSeed": 333,
+    "saThreshold": 3.5,
+    "reward": "normal",
+    "//" : "eToxPred must be located in ligand_design/etoxpred_best_model.joblib"
+}
