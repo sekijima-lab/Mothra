@@ -419,12 +419,11 @@ def MCTS(root, pareto=pareto(), time_limit_sec=3600*240):
             ##qedscore.append(scores[i][2])
             '''scores[0] Docking Score'''
             base_dock_score = 0## need set for every compound
-            match REWARD:
-                case "normal":
+            if REWARD == "normal":
                     scores[i][0]= _sbmolgennormalize(scores[i][0])
-                case "sigmoid":
+            elif "sigmoid":
                     scores[i][0]= _sigmoidnormalize(scores[i][0])
-                case "nonormal":
+            elif "nonormal":
                     scores[i][0]= _linearnormalize(scores[i][0])
             '''scores[1] QED'''
             ##scores[i][1]=round(1-scores[i][1]/10,3)## For SA score

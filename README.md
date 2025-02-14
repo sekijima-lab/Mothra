@@ -9,19 +9,22 @@
 5. [rDock](http://rdock.sourceforge.net/installation/)
 6. [Autodock Vina](https://vina.scripps.edu/) Make sure to add Vina into system path.
 7. [Open Babel](http://openbabel.org/wiki/Category:Installation) Make sure to add OpenBabel into system path.
-8. [eToxPred](http://github.com/pulimeng/eToxPred) DL and untar https://github.com/pulimeng/eToxPred/raw/master/etoxpred_best_model.tar.gz into ligand_design/ for using toxcity prediction(Optional)
+8. [eToxPred](http://github.com/pulimeng/eToxPred) DL and untar https://github.com/pulimeng/eToxPred/raw/master/etoxpred_best_model.tar.gz into ligand_design/ for using toxcity prediction. Pretrained model is provided in `ligand_design` dir.
 
 For installing Keras, rdkit, and other dependencies by `pip` on Virtual ENVironment, We provide `requirements.txt` and `init.sh` in `init` dir. After installing python, you may run `bash inits/init.sh`.
 
 ## How to Use
+#### Install Docker
+1. Get installer in https://docs.docker.com/engine/install/
+1. Run `docker build -t hoge .` with CUDA GPU devices. `hoge` is a label for the docker containers.
 
 #### Train the RNN model
 
-1. Run `python train_RNN/train_RNN.py` to train the RNN model. Pretrained model is provided in `model/model.h5`
+1. Run `docker run --gpus all --rm -it -v .:/mnt:rw hoge python train_RNN/train_RNN.py` to train the RNN model. Pretrained model is provided in `model/model.h5`
 
 #### Molecule generate
 
-1. Run `python ligand_design/mcts_ligand.py data_dir`
+1. Run `docker run --gpus all --rm -it -v .:/mnt:rw hoge python ligand_design/mcts_ligand.py ./template_for_data/`
 
 Although MOMCTS-MolGen has an extendable objective set, the default setting of objectives is docking score, QED score, logP, and a filter on SA score.
 
@@ -44,7 +47,7 @@ error_output.txt       ## output of vina and obabel errors
 ```
 .
 ├─data : for pretrain dataset
-├─data_template : template directory for ligand generation
+├─template_for_data : template directory for ligand generation
 │  ├─input : set target protein(s) for docking on VINA and configure generation
 │  ├─output : save generated ligands
 │  ├─present : save valid generated ligands and their scores
