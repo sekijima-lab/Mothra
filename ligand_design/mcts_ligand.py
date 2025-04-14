@@ -284,10 +284,10 @@ def _sbmolgennormalize(score:float)-> float:
     base_dock_score = 0
     return -round(((score - base_dock_score)*0.1)/(1+abs((score - base_dock_score)*0.1)),3)
 
-def MCTS(root, pareto=pareto(), time_limit_sec=3600*240):
+def MCTS(root, pareto=pareto(), budget=3600*240, CostPerMolecule=False):
     # initial time-limit is 240h
     """initialization of the chemical trees and grammar trees"""
-    run_time=time.time()+time_limit_sec
+    total_cost = 0
     rootnode = Node(state = root)
     state = root.Clone()
     """----------------------------------------------------------------------"""
@@ -318,8 +318,8 @@ def MCTS(root, pareto=pareto(), time_limit_sec=3600*240):
 
     """----------------------------------------------------------------------"""
 
-    while time.time()<=run_time:
-
+    while total_cost < budget:
+        start_time = time.time()
         node = rootnode # important !    this node is different with state / node is the tree node
         state = root.Clone() # but this state is the state of the initialization .  too important !!!
         """selection step"""
@@ -464,6 +464,14 @@ def MCTS(root, pareto=pareto(), time_limit_sec=3600*240):
         json.dump(savenodes.__dict__, mct_file, indent=4, separators=(',', ': '))
         mct_file.close() """
 
+        # Cost calculation
+        if CostPerMolecule==0:
+            cost = time.time() - start_time
+        else:
+            cost = CostPerMolecule * len(valid_smile)
+        total_cost += cost
+        print("Total Cost: ", total_cost, "Budget: ", budget)
+
     #print "all valid compounds:",valid_compound
     #print "all active compounds:",desired_compound
     ##print("dock_score",dock_score)
@@ -480,12 +488,10 @@ def MCTS(root, pareto=pareto(), time_limit_sec=3600*240):
     return valid_compound
 
 
-def UCTchemical(time_limit_sec=3600*240):
-    one_search_start_time=time.time()
-    time_out=one_search_start_time+60*10
+def UCTchemical(budget=3600*240, CostPerMolecule=False):
     state = chemical()
     pareto_front = pareto() if isLoadTree is False else pareto.from_dict(pareto_locate)
-    best = MCTS(root = state,pareto=pareto_front, time_limit_sec = time_limit_sec)
+    best = MCTS(root = state,pareto=pareto_front, budget = budget, CostPerMolecule = CostPerMolecule)
 
 
     return best
@@ -504,9 +510,8 @@ if __name__ == "__main__":
         config = json.load(open(dataDir+'input/python_config.json'))
         isLoadTree = config['isLoadTree']
         pareto_locate = dataDir+'present/pareto.json'
-        hours = config['limitTimeHours']
-        minutes = config['limitTimeMinutes']
-        seconds = config['limitTimeSeconds']
+        budget = config['limitBudget']
+        CostPerMolecule = config['CostPerMolecule']
         rnnModelDir = config['whereisRNNmodelDir']
     else :
         raise FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT),dataDir+'/input/python_config.json')
@@ -517,4 +522,4 @@ if __name__ == "__main__":
     val,smile=zinc_processed_with_bracket(smile_old)
     #print(val)
     model=loaded_model(rnnModelDir)
-    valid_compound=UCTchemical(time_limit_sec=hours*3600+minutes*60+seconds)
+    valid_compound=UCTchemical(budget=budget, CostPerMolecule=CostPerMolecule)

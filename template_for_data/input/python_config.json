@@ -2,13 +2,14 @@
     "isLoadTree": false,
     "whereisParetoFile":"./present/pareto.json",
     "whereisRNNmodelDir": "./model3/",
-    "limitTimeHours":23,
-    "limitTimeMinutes": 30,
-    "limitTimeSeconds": 0,
+    "limitBudget":84600,
+    "comment0":"84600=23*3600+30*60+0 23 hours 30 minutes",
+    "CostPerMolecule": 0,
+    "comment1":"Cost per molecule, 0 means time-based cost",
     "isUseeToxPred": true,
     "proteinName": "3zosA_prepared",
     "randomSeed": 333,
     "saThreshold": 3.5,
     "reward": "normal",
-    "//" : "eToxPred must be located in ligand_design/etoxpred_best_model.joblib"
+    "comment2" : "eToxPred must be located in ligand_design/etoxpred_best_model.joblib"
 }
