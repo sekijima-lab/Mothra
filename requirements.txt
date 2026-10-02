@@ -6,7 +6,7 @@ autograd==1.4
 autopage==0.5.0
 blessed==1.19.1
 cachetools==5.1.0
-certifi==2022.5.18.1
+certifi==2026.7.22
 cffi==1.15.0
 charset-normalizer==2.0.12
 cliff==3.10.1
@@ -27,7 +27,7 @@ gpustat==1.0.0
 greenlet==1.1.2
 grpcio==1.46.3
 h5py==3.6.0
-idna==3.3
+idna==3.20
 joblib==1.2.0
 keras==2.9.0
 Keras-Preprocessing==1.1.2

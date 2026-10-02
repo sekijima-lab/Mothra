@@ -16,7 +16,7 @@ python3.9 -m venv /tmp/mothra-joblib-validation
 /tmp/mothra-joblib-validation/bin/python -m pip install \
   numpy==1.22.4 scipy==1.8.1 scikit-learn==1.1.1 \
   threadpoolctl==3.1.0 joblib==1.2.0 rdkit-pypi==2022.3.4 Pillow==9.2.0
-/tmp/mothra-joblib-validation/bin/python -m unittest discover -s tests -v
+/tmp/mothra-joblib-validation/bin/python -m unittest discover -s tests -p test_joblib_compatibility.py -v
 /tmp/mothra-joblib-validation/bin/python -m pip check
 ```
 
@@ -50,3 +50,8 @@ changed dependency and its eToxPred/scikit-learn path. Full TensorFlow/CUDA RNN
 training, molecular generation, external AutoDock Vina/Open Babel docking,
 and Linux GPU container execution were not tested. Other dependency
 vulnerabilities remain and should be addressed in separate updates.
+
+## certifi / idna update
+
+See [TRUST_VALIDATION.md](TRUST_VALIDATION.md) for the separate TLS/IDNA tests,
+security rationale, intended trust-policy changes and isolated reproduction.
