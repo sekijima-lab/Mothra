@@ -28,7 +28,7 @@ greenlet==1.1.2
 grpcio==1.46.3
 h5py==3.6.0
 idna==3.3
-joblib==1.1.0
+joblib==1.2.0
 keras==2.9.0
 Keras-Preprocessing==1.1.2
 kiwisolver==1.4.4
