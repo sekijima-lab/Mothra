@@ -28,7 +28,7 @@ from rdkit.Chem import rdmolops
 import pandas as pd
 import traceback
 
-from joblib import load
+from toxicity import ToxicityPredictor
 
 #from SeterrIO import SeterrIO
 #import contextlib
@@ -192,7 +192,7 @@ def check_node_type(new_compound,dataDir):
         isUseeToxPred = config['isUseeToxPred']
         saThreshold = config['saThreshold']
         if isUseeToxPred:
-            eToxPredModel = load("./ligand_design/etoxpred_best_model.joblib")# TODO: extends compatibility on any location with config.json
+            eToxPredModel = ToxicityPredictor()# TODO: extends compatibility on any location with config.json
 
     node_index=[]
     valid_compound=[]
@@ -297,7 +297,7 @@ def check_node_type(new_compound,dataDir):
         
         ## eToxPred
         ## https://github.com/pulimeng/eToxPred/blob/master/etoxpred_predict.py
-        if True:
+        if isUseeToxPred:
             mol = Chem.AddHs(ko)
             fp = AllChem.GetMorganFingerprintAsBitVect(mol, radius=2, nBits=1024)
             fp_string = fp.ToBitString()

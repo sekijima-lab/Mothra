@@ -13,6 +13,7 @@ import argparse
 
 #from rdkit.Chem.QED import qed
 from load_model import loaded_model
+from mothra_runtime import add_runtime_arguments, log_runtime
 #from keras.preprocessing import sequence
 #from rdkit import Chem
 #from rdkit.Chem import Draw
@@ -20,7 +21,7 @@ from load_model import loaded_model
 #import sys
 from make_smile import zinc_data_with_bracket_original, zinc_processed_with_bracket
 from add_node_type import chem_kn_simulation, make_input_smile,predict_smile,check_node_type,node_to_add,expanded_node
-from pygmo import hypervolume
+from moocore import hypervolume
 import copy
 
 import os
@@ -188,11 +189,10 @@ class Node:
                     _pareto_temp[i][j] = -_pareto_temp[i][j]
                 else:
                     _pareto_temp[i][j] = -0.00000000000000001
-        hv = hypervolume(_pareto_temp)
         ref_point = [0,0,0]
         hvnum = 0
         try:
-            hvnum = hv.compute(ref_point)
+            hvnum = float(hypervolume(_pareto_temp, ref=ref_point))
         except:
             f = open("./data/present/hverror_output.txt", 'a')
             print(time.asctime( time.localtime(time.time()) ),file=f)
@@ -502,7 +502,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='search molecular')
 
     parser.add_argument('dataDir',help='path to data dir')
+    add_runtime_arguments(parser)
     args = parser.parse_args()
+    log_runtime(args.old_compatible)
 
     dataDir = args.dataDir
 
@@ -521,5 +523,5 @@ if __name__ == "__main__":
     smile_old=zinc_data_with_bracket_original()
     val,smile=zinc_processed_with_bracket(smile_old)
     #print(val)
-    model=loaded_model(rnnModelDir)
+    model=loaded_model(rnnModelDir,args.old_compatible)
     valid_compound=UCTchemical(budget=budget, CostPerMolecule=CostPerMolecule)

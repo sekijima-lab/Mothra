@@ -1,0 +1,18 @@
+{
+  "legacy_tanh": {
+    "max_abs": 0.0,
+    "different_elements": 0
+  },
+  "legacy_sigmoid": {
+    "max_abs": 0.0,
+    "different_elements": 0
+  },
+  "modern_tanh": {
+    "max_abs": 0.0,
+    "different_elements": 0
+  },
+  "modern_sigmoid": {
+    "max_abs": 0.0,
+    "different_elements": 0
+  }
+}

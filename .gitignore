@@ -1,0 +1,7 @@
+__pycache__/
+*.py[cod]
+.venv/
+model3/model.keras
+model3/model.weights.h5
+tensorboard_logs/
+model3/runtime.json

@@ -1,17 +1,9 @@
-FROM nvidia/cuda:11.2.2-cudnn8-runtime-ubuntu20.04
-RUN apt update
-RUN apt install python3.9 python3.9-venv openbabel autodock-vina -y
+FROM python:3.12.15-slim-bookworm@sha256:54c85f3c47607a77f32adec749d3c81d1348bf25833671f512b26a9b6d778cb3
+RUN apt-get update && apt-get install -y --no-install-recommends openbabel autodock-vina \
+    && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
-
-COPY requirements.txt /app
-RUN cd /app
-RUN python3.9 -m venv .venv
-ENV PATH /app/.venv/bin:$PATH
-
-#RUN source .venv/bin/activate
-RUN pip install --upgrade pip
-
-RUN pip install -r requirements.txt
+COPY requirements.txt /app/requirements.txt
+RUN python -m venv /app/.venv && /app/.venv/bin/python -m pip install --no-cache-dir -r /app/requirements.txt
 ENV PATH="/app/.venv/bin:$PATH"
 WORKDIR /mnt
 CMD ["python", "--version"]

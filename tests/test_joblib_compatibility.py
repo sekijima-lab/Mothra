@@ -1,10 +1,6 @@
-"""Regression checks for the joblib security update (Python 3.9).
-
-Run: python -m unittest discover -s tests -v
-The JSON reference was captured with joblib 1.1.0 and all other dependencies
-unchanged. This exercises eToxPred inference, not the full GPU/docking pipeline.
-"""
+"""Pickle-free toxicity regression and joblib process dispatch security checks."""
 import hashlib
+import sys
 import json
 from pathlib import Path
 import tempfile
@@ -16,7 +12,9 @@ from rdkit import Chem
 from rdkit.Chem import AllChem
 
 ROOT = Path(__file__).resolve().parents[1]
-MODEL = ROOT / "ligand_design" / "etoxpred_best_model.joblib"
+MODEL = ROOT / "ligand_design" / "etoxpred_model.npz"
+sys.path.insert(0, str(ROOT / "ligand_design"))
+from toxicity import ToxicityPredictor
 REFERENCE = Path(__file__).with_name("joblib_reference.json")
 SMILES = [
     "C", "CC", "CCC", "CCCC", "CCO", "CCCO", "CC(C)O", "CCN",
@@ -49,11 +47,11 @@ class JoblibCompatibilityTests(unittest.TestCase):
     def setUpClass(cls):
         cls.reference = json.loads(REFERENCE.read_text())
         cls.x = fingerprints()
-        cls.model = joblib.load(MODEL)
+        cls.model = ToxicityPredictor(MODEL)
 
     def test_bundled_model_matches_baseline(self):
-        self.assertEqual(hashlib.sha256(MODEL.read_bytes()).hexdigest(),
-                         self.reference["model_sha256"])
+        with np.load(MODEL, allow_pickle=False) as data:
+            self.assertEqual(str(data["source_sha256"]), self.reference["model_sha256"])
         self.assertEqual(hashlib.sha256(self.x.tobytes()).hexdigest(),
                          self.reference["fingerprints_sha256"])
         current = summarize(self.model, self.x)
@@ -67,10 +65,11 @@ class JoblibCompatibilityTests(unittest.TestCase):
 
     def test_model_serialization_roundtrip(self):
         with tempfile.TemporaryDirectory() as directory:
-            for compress in [0, 3]:
-                path = Path(directory) / (str(compress) + ".joblib")
-                joblib.dump(self.model, path, compress=compress)
-                restored = joblib.load(path)
+            for save in [np.savez, np.savez_compressed]:
+                path = Path(directory) / "model.npz"
+                with np.load(MODEL, allow_pickle=False) as data:
+                    save(path, **{k:data[k] for k in data.files})
+                restored = ToxicityPredictor(path)
                 np.testing.assert_array_equal(restored.predict_proba(self.x)[:, 1],
                                               self.reference["probabilities"])
 
