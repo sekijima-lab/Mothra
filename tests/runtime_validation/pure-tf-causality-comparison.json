@@ -1,0 +1,11 @@
+{
+  "diagnostic_only": true,
+  "production_update_on_hold": true,
+  "cpu_platform": "macOS arm64",
+  "probability_max_abs": 5.9604645e-08,
+  "probability_mae": 2.0069538e-10,
+  "gradient_max_abs": 6.2864274e-09,
+  "adam_weight_max_abs": 4.7683716e-07,
+  "strict_numeric_limits_pass": true,
+  "note": "Legacy activation arithmetic reproduced with TensorFlow operations and float64 intermediates; no native extension. Diagnostic global activations were substituted; production integration, serialization, GPU and full training remain unverified."
+}

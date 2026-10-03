@@ -1,0 +1,102 @@
+{
+  "probability": {
+    "max_abs": 5.960464477539063e-08,
+    "limit": 1e-05,
+    "pass": true
+  },
+  "probability_mae": {
+    "mean_abs": 2.0069537698397255e-10,
+    "limit": 1e-06,
+    "pass": true
+  },
+  "inputs": {
+    "pass": true
+  },
+  "targets": {
+    "pass": true
+  },
+  "argmax": {
+    "pass": true
+  },
+  "initial_weights": {
+    "per_tensor": {
+      "weight_00": 0.0,
+      "weight_01": 0.0,
+      "weight_02": 0.0,
+      "weight_03": 0.0,
+      "weight_04": 0.0,
+      "weight_05": 0.0,
+      "weight_06": 0.0,
+      "weight_07": 0.0,
+      "weight_08": 0.0
+    },
+    "max_abs": 0.0,
+    "limit": 0,
+    "pass": true
+  },
+  "gradients": {
+    "per_tensor": {
+      "gradient_00": 1.862645149230957e-09,
+      "gradient_01": 1.3969838619232178e-09,
+      "gradient_02": 4.656612873077393e-10,
+      "gradient_03": 2.3283064365386963e-10,
+      "gradient_04": 4.656612873077393e-10,
+      "gradient_05": 4.656612873077393e-10,
+      "gradient_06": 4.656612873077393e-10,
+      "gradient_07": 5.122274160385132e-09,
+      "gradient_08": 6.28642737865448e-09
+    },
+    "max_abs": 6.28642737865448e-09,
+    "limit": 1e-05,
+    "pass": true
+  },
+  "updated_weights": {
+    "per_tensor": {
+      "weight_00": 4.76837158203125e-07,
+      "weight_01": 2.384185791015625e-07,
+      "weight_02": 2.384185791015625e-07,
+      "weight_03": 9.313225746154785e-10,
+      "weight_04": 2.384185791015625e-07,
+      "weight_05": 4.76837158203125e-07,
+      "weight_06": 2.384185791015625e-07,
+      "weight_07": 2.9802322387695312e-08,
+      "weight_08": 2.9802322387695312e-08
+    },
+    "max_abs": 4.76837158203125e-07,
+    "limit": 0.0001,
+    "pass": true
+  },
+  "fingerprints": {
+    "pass": true
+  },
+  "toxicity": {
+    "max_abs": 0.0,
+    "limit": 1e-15,
+    "pass": true
+  },
+  "toxicity_acceptance": {
+    "pass": true
+  },
+  "qed": {
+    "max_abs": 1.1102230246251565e-16,
+    "limit": 1e-08,
+    "pass": true
+  },
+  "sa": {
+    "max_abs": 0.0,
+    "limit": 1e-06,
+    "pass": true
+  },
+  "loss": {
+    "max_abs": 0.0,
+    "limit": 1e-05,
+    "pass": true
+  },
+  "vocabulary": {
+    "pass": true
+  },
+  "source_hashes": {
+    "pass": true
+  },
+  "pass": true
+}

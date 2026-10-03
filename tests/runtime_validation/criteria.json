@@ -1,0 +1,15 @@
+{
+  "declared_before_old_new_results_comparison": true,
+  "rnn_probability_max_abs": 0.00001,
+  "rnn_probability_mae": 0.000001,
+  "rnn_argmax_must_match": true,
+  "loss_abs": 0.00001,
+  "gradient_max_abs": 0.00001,
+  "adam_weight_max_abs": 0.0001,
+  "toxicity_on_identical_fingerprints_max_abs": 0.000000000000001,
+  "toxicity_acceptance_must_match": true,
+  "fingerprints_must_match": true,
+  "qed_max_abs": 0.00000001,
+  "sa_score_max_abs": 0.000001,
+  "note": "One CPU thread, inference mode (dropout disabled) for numerical equivalence; no guarantee for RNG initialization, stochastic training, GPU, full optimization or docking. Do not loosen criteria after seeing results."
+}

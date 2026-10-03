@@ -1,62 +1,120 @@
 # Mothra
 
-## Requirements
-1. [Python](https://www.anaconda.com/download/)==3.9, some errors show up in newer version of python. NOTICE:`init.sh` uses pyenv, if you have not installed it, you should install `python3.9-venv`
-2. [Keras](https://github.com/fchollet/keras) (version 2.0.5) If you installed the newest version of keras, some errors will show up. Please change it back to keras 2.0.5 by pip install keras==2.0.5. 
-3. (*Optional but Highly recommended) [CUDA](https://developer.nvidia.com/cuda-downloads) (version 11.7) , [cuDNN](https://developer.nvidia.com/rdp/cudnn-download) (version 8 for CUDA 11.x)
-3. tensoflow-gpu (version 1.15.2, ver>=2.0 occurred error.) 
-4. [rdkit](https://anaconda.org/rdkit/rdkit)
-5. [rDock](http://rdock.sourceforge.net/installation/)
-6. [Autodock Vina](https://vina.scripps.edu/) Make sure to add Vina into system path.
-7. [Open Babel](http://openbabel.org/wiki/Category:Installation) Make sure to add OpenBabel into system path.
-8. [eToxPred](http://github.com/pulimeng/eToxPred) DL and untar https://github.com/pulimeng/eToxPred/raw/master/etoxpred_best_model.tar.gz into ligand_design/ for using toxcity prediction. Pretrained model is provided in `ligand_design` dir.
+Molecular generation with an RNN, multi-objective tree search, QED/SA scoring,
+AutoDock Vina docking and eToxPred toxicity filtering.
 
-For installing Keras, rdkit, and other dependencies by `pip` on Virtual ENVironment, We provide `requirements.txt` and `init.sh` in `init` dir. After installing python, you may run `bash inits/init.sh`.
+## Install
 
-## How to Use
-#### Install Docker
-1. Get installer in https://docs.docker.com/engine/install/
-1. Run `docker build -t hoge .` with CUDA GPU devices. `hoge` is a label for the docker containers.
+Use **Python 3.12.15** and a new environment. Do not install into an existing
+research environment.
 
-#### Train the RNN model
-
-1. Run `docker run --gpus all --rm -it -v .:/mnt:rw hoge python train_RNN/train_RNN.py` to train the RNN model. Pretrained model is provided in `model/model.h5`
-
-#### Molecule generate
-
-1. Run `docker run --gpus all --rm -it -v .:/mnt:rw hoge python ligand_design/mcts_ligand.py ./template_for_data/`
-
-Although MOMCTS-MolGen has an extendable objective set, the default setting of objectives is docking score, QED score, logP, and a filter on SA score.
-
-To modify your own objective set, change simulation functions in add_node_type.py, and change reward functions in mcts_ligand.py. (it may integrate into one function in future work)
-
-If the size of the objective set is not 3, don't forget to change 'default_reward' in mcts_ligand.py.
-
-Outputs of ligand_design process will store in data/present/, including:
-```
-output.txt             ## output of pareto front change
-ligands.txt            ## ligands pass SA score filter.
-scores.txt             ## raw scores of ligands
-hverror_output.txt     ## output of hypervolume calculation errors
-error_output.txt       ## output of vina and obabel errors
+```sh
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
 ```
 
+The runtime uses TensorFlow 2.21.0 / Keras 3.15.1 and RDKit 2026.03.6. The
+bundled RNN was actually saved with Keras 2.9.0; the older README's Keras 2.0.5
+and TensorFlow 1.15.2 instructions did not describe that saved model.
+Install `vina` and `obabel` separately and make them available on PATH for real
+docking. Preserve the external tool versions and receptor preparation when
+reproducing a previous docking experiment.
 
-#### directory structure
+## Historical compatibility mode
 
+**Old compatibility is enabled by default**, for both inference and training.
+It reproduces the historical CPU float32 sigmoid/tanh approximations and sums
+repeated embedding-gradient indices before Adam's second-moment update. It
+preserves the bundled GRU weights, architecture, vocabulary and dropout rates.
+It uses TensorFlow operations and requires no native extension.
+
+`--old-compatible` explicitly selects the default; `--no-old-compatible` uses
+standard current Keras GRUs and Adam. The latter may use accelerated kernels
+where available and gives slightly different results. Both commands log the
+selected mode and core library versions. Saved `.keras` models contain the mode
+in their GRU configuration; `runtime.json` records mode and runtime versions.
+An explicit execution flag takes precedence over a saved mode.
+
+Validation on macOS arm64 CPU: 256 molecules have maximum probability
+difference **5.96e-8** from the historical runtime, with identical argmax tokens;
+nine fixed-seed generation cases match exactly. These are finite comparisons,
+not guarantees for all seeds, full stochastic training or GPU/CUDA execution.
+See [validation and security evidence](tests/RUNTIME_VALIDATION.md).
+
+## Train the RNN
+
+Run commands from the repository root:
+
+```sh
+.venv/bin/python train_RNN/train_RNN.py --epochs 100
+# Standard current Keras runtime, explicitly selected:
+.venv/bin/python train_RNN/train_RNN.py --epochs 100 --no-old-compatible
 ```
-.
-├─data : for pretrain dataset
-├─template_for_data : template directory for ligand generation
-│  ├─input : set target protein(s) for docking on VINA and configure generation
-│  ├─output : save generated ligands
-│  ├─present : save valid generated ligands and their scores
-│  └─workspace : a room for docking on each ligand
-├─ligand_design : source code for ligand generation
-├─model : save an RNN generative model.
-└─train_RNN : train an RNN generative model.
+
+The default output is `model3/model.keras`, `model3/model.weights.h5`,
+`model3/model.json` and `model3/runtime.json`. The existing historical JSON/HDF5
+pair remains available; saving into `model3` replaces its JSON description,
+so use `--output another-directory` to retain the original pair unchanged.
+Use only trusted model archives. Loading uses Keras `safe_mode=True`; the
+historical JSON loader permits only the supported single-chain built-in graph.
+
+For a small isolated check, copy `train_RNN/config.json` to a temporary path
+and use `--config`, `--limit-data 64`, `--epochs 1`, `--output` and
+`--tensorboard-dir`. The complete dataset still determines the vocabulary.
+To resume, set `isLoadWeight=true`, `whereisWeightFile` to a trusted `.keras`
+archive and `last_epoch` to the completed epoch count in the scratch config.
+`--epochs` is the final epoch number. As in the historical program, recompiling
+starts fresh optimizer state; this is a weight-based continuation.
+
+## Generate molecules
+
+```sh
+.venv/bin/python ligand_design/mcts_ligand.py ./template_for_data/
+# Optional standard runtime:
+.venv/bin/python ligand_design/mcts_ligand.py ./template_for_data/ --no-old-compatible
 ```
 
+Set `whereisRNNmodelDir` in the input configuration to a directory containing
+`model.keras`, or the bundled legacy `model.json`/`model.h5` pair. The bundled
+toxicity model is a numeric-only `ligand_design/etoxpred_model.npz`; no sklearn
+pickle needs to be downloaded or loaded at runtime. The legacy model's source
+hash and probability fixtures are retained in tests. An offline converter in
+`tools/` is restricted to that trusted historical pickle and must be run in its
+historical sklearn environment, not the new runtime.
+
+The default three objectives and SA/toxicity filters remain unchanged. For
+custom objectives, update simulation/reward functions in `add_node_type.py`
+and `mcts_ligand.py`, including `default_reward` if dimensionality changes.
+Outputs are written into the selected data directory's `present/` directory:
+`output.txt`, `ligands.txt`, `scores.txt`, `hverror_output.txt`, and
+`error_output.txt`.
+
+## CPU container
+
+```sh
+docker build -t mothra .
+docker run --rm -it -v "$PWD:/mnt" mothra python ligand_design/mcts_ligand.py ./template_for_data/
+```
+
+The Dockerfile now uses a digest-pinned Python 3.12.15 CPU image instead of the
+historical CUDA 11.2/Python 3.9 image. Debian supplies Open Babel and Vina, whose
+versions can differ from the historical container. **The image build and real
+docking were not validated**, because the Docker daemon was unavailable. The
+separate `viewer_up/` notebook container and GPU deployment are outside this
+runtime migration's validation scope.
+
+## Tests
+
+```sh
+.venv/bin/python -m pip install -r requirements-test.txt
+.venv/bin/python -m unittest discover -s tests -p 'test_*.py' -v
+```
+
+The HTTP tests use only localhost TLS, a test certificate, dummy OAuth values
+and no real credentials. `openssl` must be available.
 
 ## License
-This package is distributed under the GPL License.
+
+Mothra retains its repository license. Adapted Eigen activation code in
+`mothra_runtime/activations.py` is MPL-2.0; see its
+[attribution notice](mothra_runtime/LICENSE-EIGEN-NOTICE.md).

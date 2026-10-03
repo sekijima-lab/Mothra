@@ -1,0 +1,97 @@
+{
+  "probability_max": {
+    "max_abs": 4.5180320739746094e-05,
+    "limit": 1e-05,
+    "pass": false
+  },
+  "probability_mae": {
+    "max_abs": 5.993537222082068e-09,
+    "limit": 1e-06,
+    "pass": true
+  },
+  "argmax": {
+    "pass": true
+  },
+  "inputs": {
+    "pass": true
+  },
+  "initial_weights": {
+    "max_abs": 0.0,
+    "limit": 0,
+    "pass": true,
+    "per_tensor": {
+      "weight_00": 0.0,
+      "weight_01": 0.0,
+      "weight_02": 0.0,
+      "weight_03": 0.0,
+      "weight_04": 0.0,
+      "weight_05": 0.0,
+      "weight_06": 0.0,
+      "weight_07": 0.0,
+      "weight_08": 0.0
+    }
+  },
+  "updated_weights": {
+    "max_abs": 4.410743713378906e-06,
+    "limit": 0.0001,
+    "pass": true,
+    "per_tensor": {
+      "weight_00": 1.0728836059570312e-06,
+      "weight_01": 4.410743713378906e-06,
+      "weight_02": 9.5367431640625e-07,
+      "weight_03": 9.5367431640625e-07,
+      "weight_04": 2.1457672119140625e-06,
+      "weight_05": 1.9669532775878906e-06,
+      "weight_06": 2.682209014892578e-07,
+      "weight_07": 1.043081283569336e-07,
+      "weight_08": 2.9802322387695312e-08
+    }
+  },
+  "gradients": {
+    "max_abs": 1.156982034444809e-05,
+    "limit": 1e-05,
+    "pass": false,
+    "per_tensor": {
+      "gradient_00": 1.156982034444809e-05,
+      "gradient_01": 1.08303502202034e-05,
+      "gradient_02": 2.6064226403832436e-06,
+      "gradient_03": 2.604210749268532e-06,
+      "gradient_04": 1.9773724488914013e-06,
+      "gradient_05": 1.9827857613563538e-06,
+      "gradient_06": 1.9766157492995262e-06,
+      "gradient_07": 7.799826562404633e-08,
+      "gradient_08": 3.003515303134918e-08
+    }
+  },
+  "fingerprints": {
+    "pass": true
+  },
+  "toxicity": {
+    "max_abs": 0.0,
+    "limit": 1e-15,
+    "pass": true
+  },
+  "toxicity_acceptance": {
+    "pass": true
+  },
+  "qed": {
+    "max_abs": 1.1102230246251565e-16,
+    "limit": 1e-08,
+    "pass": true
+  },
+  "sa": {
+    "max_abs": 0.0,
+    "limit": 1e-06,
+    "pass": true
+  },
+  "loss": {
+    "max_abs": 0.0,
+    "limit": 1e-05,
+    "pass": true
+  },
+  "vocabulary": {
+    "pass": true
+  },
+  "pass": false,
+  "optimizer": "DeduplicatingAdam (duplicate sparse rows summed before second-moment update)"
+}

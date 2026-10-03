@@ -1,0 +1,85 @@
+{
+  "date_jst": "2026-10-03",
+  "queries": [
+    {
+      "package": {
+        "name": "certifi",
+        "ecosystem": "PyPI"
+      },
+      "version": "2022.5.18.1"
+    },
+    {
+      "package": {
+        "name": "certifi",
+        "ecosystem": "PyPI"
+      },
+      "version": "2026.7.22"
+    },
+    {
+      "package": {
+        "name": "idna",
+        "ecosystem": "PyPI"
+      },
+      "version": "3.3"
+    },
+    {
+      "package": {
+        "name": "idna",
+        "ecosystem": "PyPI"
+      },
+      "version": "3.20"
+    }
+  ],
+  "results": [
+    {
+      "vulns": [
+        {
+          "id": "GHSA-248v-346w-9cwc",
+          "modified": "2026-09-10T03:50:15.994602Z"
+        },
+        {
+          "id": "GHSA-43fp-rhv2-5gv8",
+          "modified": "2025-02-12T18:53:14.421067Z"
+        },
+        {
+          "id": "GHSA-xqr8-7jwr-rhp7",
+          "modified": "2026-09-10T03:50:08.653753Z"
+        },
+        {
+          "id": "PYSEC-2022-42986",
+          "modified": "2023-11-08T04:08:19.066843Z"
+        },
+        {
+          "id": "PYSEC-2023-135",
+          "modified": "2023-11-08T04:13:04.801823Z"
+        },
+        {
+          "id": "PYSEC-2024-230",
+          "modified": "2026-06-10T17:14:18.786020Z"
+        }
+      ]
+    },
+    {},
+    {
+      "vulns": [
+        {
+          "id": "GHSA-65pc-fj4g-8rjx",
+          "modified": "2026-09-10T03:50:45.700124Z"
+        },
+        {
+          "id": "GHSA-jjg7-2v4v-x38h",
+          "modified": "2026-09-10T03:50:12.774088Z"
+        },
+        {
+          "id": "PYSEC-2024-60",
+          "modified": "2026-06-10T17:01:21.102419Z"
+        },
+        {
+          "id": "PYSEC-2026-215",
+          "modified": "2026-06-16T16:15:04.639265Z"
+        }
+      ]
+    },
+    {}
+  ]
+}

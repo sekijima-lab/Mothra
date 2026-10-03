@@ -1,0 +1,4 @@
+-r requirements.txt
+google-auth==2.58.0
+google-auth-oauthlib==1.5.0
+requests-oauthlib==2.0.0

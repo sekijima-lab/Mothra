@@ -1,0 +1,7 @@
+{
+  "fixtures": 63,
+  "max_abs": 7.105427357601002e-15,
+  "limit": 1e-12,
+  "candidate_rankings_identical": true,
+  "pass": true
+}

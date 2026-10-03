@@ -1,11 +1,16 @@
 import csv
+import argparse
+from pathlib import Path
 import datetime
 import json
 import numpy as np
 import os
 from keras.layers import Embedding,Dense, Activation,TimeDistributed, GRU, Dropout, Input
+import sys
+sys.path.insert(0,str(Path(__file__).resolve().parents[1]))
+from mothra_runtime import CompatibleGRU, DeduplicatingAdam, add_runtime_arguments, log_runtime, runtime_info, set_model_mode
 from keras.optimizers import Adam
-from keras.utils.np_utils import to_categorical
+from keras.utils import to_categorical
 from keras.models import Model
 from keras.callbacks import TensorBoard, Callback, EarlyStopping
 from make_smile import zinc_data_with_bracket_original,zinc_processed_with_bracket
@@ -114,29 +119,25 @@ def generate_smile(model,val):
 """
 
 
-def save_model(model):
-    """
-        Save model by JSON and keras scheme.
-    """
-    # serialize model to JSON
-    model_json = model.to_json(indent=4, separators=(',', ': '))
-    with open("model2.json", "w") as json_file:
-         json_file.write(model_json)
-    # serialize weights to HDF5
-    model.save("model.h5",save_format='h5')
-    model.save("model",save_format='tf')
-    print("Saved model to disk")
+def save_model(model, directory="model3", old_compatible=True):
+    directory = Path(directory)
+    directory.mkdir(parents=True, exist_ok=True)
+    model.save(directory / "model.keras")
+    model.save_weights(directory / "model.weights.h5")
+    (directory / "model.json").write_text(model.to_json())
+    (directory / "runtime.json").write_text(json.dumps(runtime_info(old_compatible),indent=2))
+    print("Saved model to", directory)
 
 
-def _createModel(vocab_size: int, embed_size: int, N: int):
+def _createModel(vocab_size: int, embed_size: int, N: int, old_compatible=True):
     """
         Create NN Model.
     """
     input = Input(shape=(N,))
-    x = Embedding(input_dim=vocab_size, output_dim=embed_size, input_length=N, mask_zero=False)(input)
-    x = GRU(units=256,activation='tanh',return_sequences=True)(x)
+    x = Embedding(input_dim=vocab_size, output_dim=embed_size, mask_zero=False)(input)
+    x = CompatibleGRU(units=256,return_sequences=True,old_compatible=old_compatible)(x)
     x = Dropout(.2)(x)
-    x = GRU(units=256,activation='tanh',return_sequences=True)(x)
+    x = CompatibleGRU(units=256,return_sequences=True,old_compatible=old_compatible)(x)
     x = Dropout(.2)(x)
     x = TimeDistributed(Dense(embed_size, activation='softmax'))(x)
     model = Model(inputs=input, outputs=x)
@@ -166,7 +167,7 @@ class EarlyStoppingByTimer(Callback):
         # The epoch the training stops at.
         self.stopped_epoch = 0
         # Initialize the best as infinity.
-        self.best = np.Inf
+        self.best = np.inf
 
     def on_epoch_begin(self, epoch, logs=None):
         self._recentTrainBegin = datetime.datetime.now(self._JST)
@@ -195,15 +196,27 @@ class EarlyStoppingByTimer(Callback):
             print("Epoch %05d: early stopping" % (self.stopped_epoch + 1))
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--limit-data", type=int)
+    parser.add_argument("--output", default="model3")
+    parser.add_argument("--tensorboard-dir", default="../tensorboard_logs")
+    parser.add_argument("--config", default="train_RNN/config.json")
+    parser.add_argument("--data", default="data/250k_rndm_zinc_drugs_clean.smi")
+    add_runtime_arguments(parser)
+    args = parser.parse_args()
+    log_runtime(args.old_compatible)
+    if args.epochs < 1 or (args.limit_data is not None and args.limit_data < 2):
+        parser.error("epochs must be positive and limit-data must be at least two")
     startTime = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=+9),'JST'))
     # set up for multi-gpu env.
     dataOpt = data.Options()
     dataOpt.experimental_distribute.auto_shard_policy = data.experimental.AutoShardPolicy.DATA
     strategy = distribute.MirroredStrategy()
 
-    if os.path.exists('./train_RNN/config.json') :
+    if os.path.exists(args.config) :
         # load configuares.
-        config = json.load(open('./train_RNN/config.json','r'))
+        config = json.load(open(args.config,'r'))
         batchSize = config['batchSize']
         learningRate = config['learningRate']
         trainingSplit = 1.0 - config['validationSplit']
@@ -229,13 +242,16 @@ if __name__ == "__main__":
                 hours=2)
             )
         init = 0
-        isLoadWeight = false
-        needTensorboard = false
+        isLoadWeight = False
+        needTensorboard = False
     GLOBAL_BATCH_SIZE = batchSize * strategy.num_replicas_in_sync
 
     # prepare data from /data
-    smile=zinc_data_with_bracket_original()
+    with open(args.data) as source:
+        smile = [line.rstrip() for line in source]
     valcabulary,all_smile=zinc_processed_with_bracket(smile)
+    if args.limit_data is not None:
+        all_smile = all_smile[:args.limit_data]
     X_train,y_train=prepare_data(valcabulary,all_smile)
   
     maxlen=81
@@ -264,7 +280,7 @@ if __name__ == "__main__":
     earlyStopping = EarlyStopping(monitor='val_loss', min_delta=0.0, patience=2)
     callbacks = [earlystoppingByTimer]#, earlyStopping]
     if needTensorboard:
-        tensorboard_callback = TensorBoard(log_dir="../tensorboard_logs", profile_batch=5)
+        tensorboard_callback = TensorBoard(log_dir=args.tensorboard_dir, profile_batch=5)
         callbacks.append(tensorboard_callback)
     # prepare custom loss function
     with strategy.scope():
@@ -273,18 +289,19 @@ if __name__ == "__main__":
             per_example_loss = loss_object(labels, predictions)
             return tf.nn.compute_average_loss(per_example_loss, global_batch_size=GLOBAL_BATCH_SIZE)
         if isLoadWeight:
-            model = tf.keras.models.load_model(os.path.join(os.path.curdir,whereisWeightFile))
+            model = tf.keras.models.load_model(os.path.join(os.path.curdir,whereisWeightFile), compile=False, safe_mode=True)
+            model=set_model_mode(model,args.old_compatible)
         else:
-            model = _createModel(vocab_size=vocab_size,embed_size=embed_size,N=N)
+            model = _createModel(vocab_size=vocab_size,embed_size=embed_size,N=N,old_compatible=args.old_compatible)
 
-        model.compile(loss=tf.keras.losses.CategoricalCrossentropy(), optimizer=tf.keras.optimizers.Adam(learning_rate=learningRate), metrics=['accuracy'])
-        model.fit(x=trainDataset,epochs=100, validation_data=validDataset, callbacks=callbacks,initial_epoch=init,verbose=2)
+        model.compile(loss=tf.keras.losses.CategoricalCrossentropy(), optimizer=(DeduplicatingAdam if args.old_compatible else Adam)(learning_rate=learningRate), metrics=['accuracy'])
+        history=model.fit(x=trainDataset,epochs=args.epochs, validation_data=validDataset, callbacks=callbacks,initial_epoch=init,verbose=2)
         #model.fit(X,y_train_one_hot,epochs=100, validation_split=.1, callbacks=callbacks,initial_epoch=init,verbose=2)
         
-    save_model(model)
+    save_model(model, args.output,args.old_compatible)
 
     # Save Stopped Epoch ton config.json
-    if os.path.exists('./train_RNN/config.json'):
-        config = json.load(open('./train_RNN/config.json','r'))
-        config["last_epoch"] = earlystoppingByTimer.stopped_epoch
-        json.dump(config,open('./train_RNN/config.json','w'), indent=4, separators=(',', ': '))
+    if os.path.exists(args.config):
+        config = json.load(open(args.config,'r'))
+        config["last_epoch"] = history.epoch[-1]+1 if history.epoch else init
+        json.dump(config,open(args.config,'w'), indent=4, separators=(',', ': '))
